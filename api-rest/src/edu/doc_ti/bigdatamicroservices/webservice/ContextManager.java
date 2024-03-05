@@ -12,8 +12,6 @@ import javax.servlet.annotation.WebListener;
 
 import org.apache.log4j.Logger;
 
-
-
 @WebListener
 public class ContextManager implements ServletContextListener {
 
@@ -26,7 +24,6 @@ public class ContextManager implements ServletContextListener {
 	
 
 	public  void readResourceHT(String resource, Hashtable<String,String> htAux) {
-		
 		
 		InputStream inputStream = null ;
 
@@ -65,26 +62,20 @@ public class ContextManager implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
     	
-    	LOG.info("FELIPE: starting app");
-    	System.out.println("FELIPE: starting app");
-    	
-//    	System.out.println ( ReadResource.readResource("list.txt") ) ;
-    	
+    	LOG.info("LOGGING: starting app");
+    	System.out.println("LOGGING: starting app ------------------------------------------------");
     	
     	for (String aux : auxArrHT) {
     		Hashtable<String, String> htAux = new Hashtable<String,String>() ;
     		readResourceHT(aux, htAux) ;
     		htMain.put ( aux, htAux) ;
     	}
-    	
-    	
-    	
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
-    	LOG.info("FELIPE: stopping app");
-    	System.out.println("FELIPE: stopping app");
+    	LOG.info("LOGGING: stopping app");
+    	System.out.println("LOGGING: stopping app");
 
     }
 }
