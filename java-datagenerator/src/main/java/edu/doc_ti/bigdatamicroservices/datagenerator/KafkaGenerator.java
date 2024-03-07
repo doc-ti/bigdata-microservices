@@ -89,6 +89,13 @@ public class KafkaGenerator {
 			}
 		} 
 		
+		if ( cmd.hasOption('s')  ) {
+			try {
+				maxSeconds = Integer.parseInt(cmd.getParsedOptionValue("s").toString());
+			} catch (Exception e) {
+			}
+		} 
+		
 //		-Dorg.slf4j.simpleLogger.defaultLogLevel=debug
 				
 				
