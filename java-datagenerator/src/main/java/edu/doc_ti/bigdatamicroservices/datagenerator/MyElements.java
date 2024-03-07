@@ -1,4 +1,4 @@
-package edu.doc_ti.jfcp.selec_reproc.gendata;
+package edu.doc_ti.bigdatamicroservices.datagenerator;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

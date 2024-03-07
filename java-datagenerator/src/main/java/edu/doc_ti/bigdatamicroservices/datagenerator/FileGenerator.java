@@ -1,5 +1,5 @@
 
-package edu.doc_ti.jfcp.selec_reproc.gendata ;
+package edu.doc_ti.bigdatamicroservices.datagenerator ;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
