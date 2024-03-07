@@ -3,6 +3,7 @@ package edu.doc_ti.bigdatamicroservices.datagenerator;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Scanner;
 
@@ -10,13 +11,18 @@ import org.apache.log4j.Logger;
 
 public class LookupData  {
 
+	
 	final static Logger LOG = Logger.getLogger(LookupData.class);
 	
 	final static String auxArrHT[] = {"bssmap", "internalcause", "nrn", "operator", "ranap", "tac"};
 
-	static Hashtable<String, Hashtable<String,String>> htMain = new Hashtable<String, Hashtable<String,String>>() ; 
+	static Hashtable<String, ArrayList<String>> htMain = new Hashtable<String, ArrayList<String>>() ; 
 
-	public static void readResourceHT(String resource, Hashtable<String,String> htAux) {
+	static {
+		loadData() ;
+	}
+
+	public static void readResourceHT(String resource, ArrayList<String> arrAux) {
 		
 		LookupData l = new LookupData() ;
 		
@@ -37,7 +43,7 @@ public class LookupData  {
 				String aux[] = line.split(";") ;
 				
 				if (aux.length >= 2 ) {
-					htAux.put(aux[0], aux[1]) ;
+					arrAux.add(aux[0]) ;
 				}
 				
 			}
@@ -59,9 +65,9 @@ public class LookupData  {
     	System.out.println("LOGGING: starting app ------------------------------------------------");
     	
     	for (String aux : auxArrHT) {
-    		Hashtable<String, String> htAux = new Hashtable<String,String>() ;
-    		readResourceHT(aux, htAux) ;
-    		htMain.put ( aux, htAux) ;
+    		ArrayList<String> arrAux = new ArrayList<String>() ;
+    		readResourceHT(aux, arrAux) ;
+    		htMain.put ( aux, arrAux) ;
     	}
     }
 

@@ -70,7 +70,7 @@ public class DistribData {
 //    	System.out.println (arrN) ;
 	}
 	
-	
+
 	
 	public String searchNext(BaseProviders faker) {
 		

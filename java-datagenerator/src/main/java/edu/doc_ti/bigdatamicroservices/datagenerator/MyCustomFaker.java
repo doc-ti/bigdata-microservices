@@ -42,6 +42,13 @@ public class MyCustomFaker extends BaseFaker {
 		
         return Format.toCsv(
         		
+                Csv.Column.of("bssmap", () -> myFaker.MyElements().dataFromFile("bssmap")) ,
+                Csv.Column.of("internalcause", () -> myFaker.MyElements().dataFromFile("internalcause")) ,
+                Csv.Column.of("nrn", () -> myFaker.MyElements().dataFromFile("nrn")) ,
+                Csv.Column.of("operator", () -> myFaker.MyElements().dataFromFile("operator")) ,
+                Csv.Column.of("ranap", () -> myFaker.MyElements().dataFromFile("ranap")) ,
+                Csv.Column.of("tac", () -> myFaker.MyElements().dataFromFile("tac")) ,
+                
                 Csv.Column.of("f3",  () -> myFaker.MyElements().nextDeterminedDistribElement("id3")),
                 Csv.Column.of("f4",  () -> myFaker.MyElements().nextDeterminedDistribElement("id4")),
                 Csv.Column.of("f5",  () -> myFaker.MyElements().nextDeterminedDistribElement("id5")),
@@ -76,7 +83,7 @@ public class MyCustomFaker extends BaseFaker {
                 Csv.Column.of("f34", () -> myFaker.expression("#{numerify '##'}")) ,	
                 Csv.Column.of("f35", () -> myFaker.expression("#{numerify '310004##########'}")) ,
                 Csv.Column.of("f36", () -> myFaker.expression("#{numerify '#'}")) ,
-//                Csv.Column.of("f37", () -> myFaker.expression("#{numerify '#'}")) ,
+                Csv.Column.of("f37", () -> myFaker.expression("#{numerify '#'}")) ,
                 Csv.Column.of("f38", () -> myFaker.expression("#{numerify '#'}")) ,
                 Csv.Column.of("f39", () -> myFaker.expression("#{numerify '#'}")) ,
                 Csv.Column.of("f40", () -> myFaker.expression("#{numerify '#'}")) ,

@@ -2,6 +2,7 @@ package edu.doc_ti.bigdatamicroservices.datagenerator;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Hashtable;
 
 import net.datafaker.providers.base.AbstractProvider;
@@ -109,6 +110,18 @@ public class MyElements extends AbstractProvider<BaseProviders> {
     }
     
     
-    
+	
+	public String dataFromFile(String name) {
+		
+		ArrayList<String> arr = LookupData.htMain.get(name) ;
+		
+		String aux = "NA" ; 
+		if (arr != null ) {
+			int val = faker.random().nextInt(0, arr.size()-1) ;
+			aux = arr.get(val) ;
+		}
+		
+		return aux ;
+	}
 
 }
