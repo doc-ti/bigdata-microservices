@@ -24,6 +24,7 @@ public class KafkaGenerator {
         log.info("I am a Kafka Producer");
 
         int speed = 500 ;
+        int maxSeconds = 10 ; 
         String bootstrapServers = "127.0.0.1:9092";
         String topic = "topic_in_stream" ;
         
@@ -34,6 +35,7 @@ public class KafkaGenerator {
 		options.addOption(new Option("n", "numrecords", true, "Generate n records per second (default " + speed + ")"));
 		options.addOption(new Option("b", "broker", true, "List of kafka bootstrap servers (default: " + bootstrapServers + ")" ));
 		options.addOption(new Option("t", "topic", true, "Topic name (default: "+ topic +")"));
+		options.addOption(new Option("s", "seconds", true, "Generate data for s seconds (default " + maxSeconds+ ")"));
         
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = null ;
@@ -51,16 +53,16 @@ public class KafkaGenerator {
 		}
        
 		try {
-			FileGenerator.tsFrom = FileGenerator.sdf.parse(FileGenerator.sdf.format(new Date() ));
+			MyCustomFaker.tsFrom = MyCustomFaker.sdf.parse(MyCustomFaker.sdf.format(new Date() ));
 		} catch (ParseException e) {}
 		if ( cmd.hasOption('d')  ) {
 			try {
-				FileGenerator.tsFrom = FileGenerator.sdf.parse(cmd.getParsedOptionValue("date").toString());
+				MyCustomFaker.tsFrom = MyCustomFaker.sdf.parse(cmd.getParsedOptionValue("date").toString());
 			} catch (Exception e) {
 			}
 		} 
 		
-		FileGenerator.tsTo = new Date( FileGenerator.tsFrom.getTime() + 24*3600*1000 - 1000);
+		MyCustomFaker.tsTo = new Date( MyCustomFaker.tsFrom.getTime() + 24*3600*1000 - 1000);
         
 		
 		if ( cmd.hasOption('n')  ) {
@@ -70,8 +72,8 @@ public class KafkaGenerator {
 			}
 		} 
 		
-		if (speed > 5000) {
-			speed = 5000 ;
+		if (speed > 10000) {
+			speed = 10000 ;
 		}
 		
 		if ( cmd.hasOption('t')  ) {
@@ -100,12 +102,12 @@ public class KafkaGenerator {
         // create the producer
         KafkaProducer<String, String> producer = new KafkaProducer<>(properties);
 
-        
-        while ( true ) {
+        int secondsCount = 0 ;
+        while ( secondsCount < maxSeconds ) {
         	long t0 = System.currentTimeMillis();
         	for ( int nn = 1 ; nn<= speed; nn++ ) {
                 ProducerRecord<String, String> producerRecord =
-                        new ProducerRecord<>(topic, FileGenerator.getData(1).replaceAll("\"", "").replace("\n", ""));
+                        new ProducerRecord<>(topic, MyCustomFaker.getData(1).replaceAll("\"", "").replace("\n", ""));
                 producer.send(producerRecord);
         	}
             // flush data - synchronous
@@ -118,8 +120,10 @@ public class KafkaGenerator {
 					Thread.sleep(1) ;
 				} catch (InterruptedException e) {}
             }
+            secondsCount++ ;
 
         }
+        producer.close(); 
 
     }
 }
