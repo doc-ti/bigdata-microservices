@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import edu.doc_ti.bigdatamicroservices.data.LookupData;
 import net.datafaker.providers.base.AbstractProvider;
 import net.datafaker.providers.base.BaseProviders;
 
@@ -113,11 +114,11 @@ public class MyElements extends AbstractProvider<BaseProviders> {
 	
 	public String dataFromFile(String name) {
 		
-		ArrayList<String> arr = LookupData.htMain.get(name) ;
+		ArrayList<String> arr = LookupData.arrMain.get(name) ;
 		
 		String aux = "NA" ; 
 		if (arr != null ) {
-			int val = faker.random().nextInt(0, arr.size()-1) ;
+			int val = faker.random().nextInt(1, arr.size()-1) ;
 			aux = arr.get(val) ;
 		}
 		

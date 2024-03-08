@@ -21,7 +21,7 @@ import org.apache.commons.cli.Options;
 @SuppressWarnings("deprecation")
 public class FileGenerator {
 
-//	public static String DELIMITER = ";" ;
+//	public static String DELIMITER = "," ;
 //	static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	static SimpleDateFormat sdfFileName = new SimpleDateFormat("yyyyMMdd_HHmmss");
 	static SimpleDateFormat sdfNice = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

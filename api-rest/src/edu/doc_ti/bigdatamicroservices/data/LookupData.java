@@ -1,4 +1,4 @@
-package edu.doc_ti.bigdatamicroservices.datagenerator;
+package edu.doc_ti.bigdatamicroservices.data;
 
 
 import java.io.IOException;
@@ -14,15 +14,16 @@ public class LookupData  {
 	
 	final static Logger LOG = Logger.getLogger(LookupData.class);
 	
-	final static String auxArrHT[] = {"bssmap", "internalcause", "nrn", "operator", "ranap", "tac"};
+	public final static String namesHT[] = {"bssmap", "internalcause", "nrn", "operator", "ranap", "tac"};
 
-	static Hashtable<String, ArrayList<String>> htMain = new Hashtable<String, ArrayList<String>>() ; 
+	public static Hashtable<String, ArrayList<String>> arrMain = new Hashtable<String, ArrayList<String>>() ; 
+	public static Hashtable<String, Hashtable<String,String>> htMain = new Hashtable<String, Hashtable<String,String>>() ; 
 
 	static {
-		loadData() ;
+		loadTablesInMemory() ;
 	}
 
-	public static void readResourceHT(String resource, ArrayList<String> arrAux) {
+	public static void readResourceHT(String resource, ArrayList<String> arrAux, Hashtable<String, String> htAux ) {
 		
 		LookupData l = new LookupData() ;
 		
@@ -44,8 +45,9 @@ public class LookupData  {
 				
 				if (aux.length >= 2 ) {
 					arrAux.add(aux[0]) ;
-				}
+					htAux.put(aux[0], aux[1]) ;
 				
+				}
 			}
 			
 			s.close() ;
@@ -59,15 +61,17 @@ public class LookupData  {
 		
 	}	
 	
-    public static void loadData() {
+    public static void loadTablesInMemory() {
     	
-    	LOG.info("LOGGING: starting app");
-    	System.out.println("LOGGING: starting app ------------------------------------------------");
+    	LOG.info("LOGGING: loading lookup data ------------------------------------------------");
+    	System.out.println("LOGGING: loading lookup data ------------------------------------------------");
     	
-    	for (String aux : auxArrHT) {
+    	for (String aux : namesHT) {
     		ArrayList<String> arrAux = new ArrayList<String>() ;
-    		readResourceHT(aux, arrAux) ;
-    		htMain.put ( aux, arrAux) ;
+    		Hashtable<String,String> htAux = new Hashtable<String,String>() ;
+    		readResourceHT(aux, arrAux, htAux) ;
+    		htMain.put ( aux, htAux) ;
+    		arrMain.put ( aux, arrAux) ;
     	}
     }
 

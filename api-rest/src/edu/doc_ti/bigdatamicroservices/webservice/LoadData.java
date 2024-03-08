@@ -8,6 +8,8 @@ import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.doc_ti.bigdatamicroservices.data.LookupData;
+
 @Path("/load")
 public class LoadData {
  
@@ -19,16 +21,15 @@ public class LoadData {
 
     	JSONObject jsonObject = new JSONObject();
     	
-    	if (ContextManager.htMain.size() == 0 ) {
+    	if (LookupData.htMain.size() == 0 ) {
 	        jsonObject.put("load", "NEW LOAD");
-	    	ContextManager cm = new ContextManager() ;
-	    	cm.contextInitialized(null);
+	        LookupData.loadTablesInMemory();
     	} else {
 	        jsonObject.put("load", "ALREADY LOADED");
     	}
 
-    	for ( String key: ContextManager.htMain.keySet()) {
-	        jsonObject.put(key, ContextManager.htMain.get(key).size());
+    	for ( String key: LookupData.htMain.keySet()) {
+	        jsonObject.put(key, LookupData.htMain.get(key).size());
     	}
         String result = jsonObject.toString();
         return Response.status(200).entity(result).build();

@@ -36,6 +36,7 @@
 	      <include>com.fasterxml.jackson.core:jackson-annotations</include>
 	      <include>com.mysql:mysql-connector-j</include>
 	      <include>org.apache.commons:commons-lang3</include>
+	      <include>com.googlecode.json-simple:json-simple</include>
       </includes>
       <excludes>
       </excludes>

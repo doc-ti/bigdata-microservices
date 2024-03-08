@@ -11,6 +11,8 @@ import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.doc_ti.bigdatamicroservices.data.LookupData;
+
 @Path("/search")
 public class LookupService {
  
@@ -25,7 +27,7 @@ public class LookupService {
 
     	JSONObject jsonObject = new JSONObject();
 
-    	Hashtable<String, String> htAux= ContextManager.htMain.get(tab) ;
+    	Hashtable<String, String> htAux= LookupData.htMain.get(tab) ;
     	String res = null ;
     	
     	if ( htAux != null ){
@@ -55,11 +57,11 @@ public class LookupService {
     	
     	
     	int count = 0 ;
-    	for (String tabHT: ContextManager.auxArrHT ) {
+    	for (String tabHT: LookupData.namesHT ) {
     		
     		String res = "" ;
     		try {
-    			res = ContextManager.htMain.get(tabHT).get( keysArr[count] ) ;
+    			res = LookupData.htMain.get(tabHT).get( keysArr[count] ) ;
     		} catch (Exception ex) {}
     		if ( res == null ) {
     			res = "NA" ;

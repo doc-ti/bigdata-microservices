@@ -39,19 +39,22 @@ import org.apache.kafka.streams.Topology;
 public class MainTopology {
 	public static int numRecords = 5000 ;
 	
+	public static String urlBase = "http://localhost:8080/api-rest/search" ;
 
     public static void main(String[] args) {
     	
 		String topicIn = "topic_in_stream" ; 
 		String topicOut = "topic_out_data" ; 
 		String bootstrapServers = "127.0.0.1:9092" ;
+		int numThreads = 1 ;
 		
 		Options options = new Options();
 		options.addOption(new Option("h", "help", false, "Print this help"));
-		options.addOption(new Option("n", "numrecords", true, "Make a different tag every N records (def: " + numRecords + ")"));
 		options.addOption(new Option("b", "broker", true, "List of kafka bootstrap servers (def: " + bootstrapServers + ")"));
-		options.addOption(new Option("i", "topic_in", true, "Input topic name (default: " + topicIn + ")"));
-		options.addOption(new Option("o", "topic_out", true, "Output topic name (default: " + topicOut + ")"));
+		options.addOption(new Option("t", "topic_in", true, "Input topic name (default: " + topicIn + ")"));
+		options.addOption(new Option("u", "url", true, "URL base (default: " + urlBase + ")"));
+		options.addOption(new Option("h", "threads", true, "Number of threads (default: " + numThreads + ")"));
+//		options.addOption(new Option("o", "topic_out", true, "Output topic name (default: " + topicOut + ")"));
     	
     	
 		
@@ -66,20 +69,13 @@ public class MainTopology {
 
 		if ( cmd.hasOption('h') || cmd.getOptions().length < 0 ) {
 			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp("TaggingTopology", options);
+			formatter.printHelp("MainTopology", options);
 			System.exit(0) ;
 		}
        
-		
-		if ( cmd.hasOption('n')  ) {
+		if ( cmd.hasOption('t')  ) {
 			try {
-				numRecords = Integer.parseInt(cmd.getParsedOptionValue("n").toString());
-			} catch (Exception e) {
-			}
-		} 
-		if ( cmd.hasOption('i')  ) {
-			try {
-				topicIn = cmd.getParsedOptionValue("i").toString() ;
+				topicIn = cmd.getParsedOptionValue("t").toString() ;
 			} catch (Exception e) {
 			}
 		} 
@@ -97,12 +93,18 @@ public class MainTopology {
 			}
 		}
 		
+		if ( cmd.hasOption('h')  ) {
+			try {
+				numThreads = Integer.parseInt( cmd.getParsedOptionValue("h").toString() ) ;
+			} catch (Exception e) {
+			}
+		}		
         Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "tagging-topology" );
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "microservice-test-" + System.currentTimeMillis() );
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-        props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, "1") ;
+        props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, numThreads) ;
         
         Topology builder = new Topology();
 

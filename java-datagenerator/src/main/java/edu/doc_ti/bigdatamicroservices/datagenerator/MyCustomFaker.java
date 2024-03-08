@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import edu.doc_ti.bigdatamicroservices.data.DataProcessing;
 import net.datafaker.formats.Csv;
 import net.datafaker.formats.Format;
 import net.datafaker.providers.base.BaseFaker;
@@ -21,16 +22,25 @@ public class MyCustomFaker extends BaseFaker {
 	static Date tsTo = null ;
 
 
-	public static String DELIMITER = ";" ;
+	public static String DELIMITER = "," ;
 	
 	
 	public static void main(String[] args) {
 		
+		String d = getDataClean(1) ;
+		System.out.println(d) ;
 		
-		System.out.println(getData(1)) ;
+		DataProcessing dp = new DataProcessing() ;
+		
+		String json = dp.process(d) ;
+		System.out.println( json );
 		
 	}
 	
+	public static String getDataClean(int numToPrint) {
+		return getData(numToPrint).replaceAll("\"", "").replaceAll("\r", "").replaceAll("\n", "") ;
+	}
+
 	public static String getData(int numToPrint) {
 		
 		if (tsFrom == null ) {
