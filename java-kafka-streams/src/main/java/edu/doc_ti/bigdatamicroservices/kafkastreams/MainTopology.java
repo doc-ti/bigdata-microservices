@@ -16,6 +16,10 @@
  */
 package edu.doc_ti.bigdatamicroservices.kafkastreams;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
@@ -30,6 +34,8 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 
+import edu.doc_ti.bigdatamicroservices.data.LookupData;
+
 /**
  * In this example, we implement a simple LineSplit program using the high-level Streams DSL
  * that reads from a source topic "streams-plaintext-input", where the values of messages represent lines of text;
@@ -37,11 +43,14 @@ import org.apache.kafka.streams.Topology;
  * each record represents a single word.
  */
 public class MainTopology {
-	public static int numRecords = 5000 ;
 	
 	public static String urlBase = "http://localhost:8080/api-rest/process/" ;
 
 	static boolean isLocalProcessing = false;
+	static SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+	
+
+	private static ArrayList<ProcessorData> arrProcesors = new ArrayList<ProcessorData>();
 
     public static void main(String[] args) {
     	
@@ -96,10 +105,14 @@ public class MainTopology {
 		}
 		
 		isLocalProcessing  =  (urlBase.compareToIgnoreCase("local") == 0 );
+		
+		if ( isLocalProcessing ) {
+			LookupData.htMain.size();
+		}
 
 		if ( cmd.hasOption('n')  ) {
 			try {
-				numThreads = Integer.parseInt( cmd.getParsedOptionValue("h").toString() ) ;
+				numThreads = Integer.parseInt( cmd.getParsedOptionValue("n").toString() ) ;
 			} catch (Exception e) {
 			}
 		}		
@@ -113,11 +126,11 @@ public class MainTopology {
 		
 		
 		Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "microservice-test-" + System.currentTimeMillis() );
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "microservice-test-" + sdf.format(new Date() ) );
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-        props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, numThreads) ;
+        props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, Integer.toString(numThreads)) ;
         
         Topology builder = new Topology();
 
@@ -145,6 +158,22 @@ public class MainTopology {
         } catch (Throwable e) {
             System.exit(1);
         }
+        
+        for ( ProcessorData p : arrProcesors) {
+        	try {
+				p.bw.flush() ;
+				p.bw.close() ;
+				p.fw.flush();
+				p.fw.close();
+			} catch (IOException e) {}
+        }
+        
         System.exit(0);
     }
+
+	public static void register(ProcessorData processorData) {
+		
+		arrProcesors .add(processorData) ;
+		
+	}
 }

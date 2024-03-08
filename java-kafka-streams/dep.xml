@@ -26,6 +26,7 @@
 	      <include>org.apache.kafka:kafka-streams</include>
 	      <include>org.apache.kafka:kafka-clients</include>
 	      <include>commons-cli:commons-cli</include>
+	      <include>commons-logging:commons-logging</include>
 	      <include>org.slf4j:slf4j-reload4j</include>
 	      <include>org.slf4j:slf4j-api</include>
 	      <include>ch.qos.reload4j:reload4j</include>
@@ -34,9 +35,10 @@
 	      <include>com.fasterxml.jackson.core:jackson-databind</include>
 	      <include>com.fasterxml.jackson.core:jackson-core</include>
 	      <include>com.fasterxml.jackson.core:jackson-annotations</include>
-	      <include>com.mysql:mysql-connector-j</include>
 	      <include>org.apache.commons:commons-lang3</include>
 	      <include>com.googlecode.json-simple:json-simple</include>
+	      <include>org.apache.httpcomponents:httpcore</include>
+	      <include>org.apache.httpcomponents:httpclient</include>
       </includes>
       <excludes>
       </excludes>

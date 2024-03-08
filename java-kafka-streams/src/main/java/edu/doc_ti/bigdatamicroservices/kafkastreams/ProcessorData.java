@@ -1,8 +1,10 @@
 package edu.doc_ti.bigdatamicroservices.kafkastreams;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -18,9 +20,6 @@ import org.apache.kafka.streams.processor.api.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import edu.doc_ti.bigdatamicroservices.data.DataProcessing;
 
 public class ProcessorData implements Processor<String, String, String, String> {
@@ -31,23 +30,36 @@ public class ProcessorData implements Processor<String, String, String, String> 
    
     private HttpClient httpClient;
     
-    @SuppressWarnings("unused")
-	private ObjectMapper mapper;
-    @SuppressWarnings("unused")
-	private TypeReference<Map<String, String>> typeRef;
-    int counterRecords = 0 ;
+//	private ObjectMapper mapper;
+//	private TypeReference<Map<String, String>> typeRef;
 
+    int counterRecords = 0 ;
+    
 	private DataProcessing dp;
 
-   
+	BufferedWriter bw;
+	FileWriter fw;
+
 	@Override
     public void init(final ProcessorContext<String, String> context) {
     	
     	this._context = context ;
-        this.mapper = new ObjectMapper();
-        this.typeRef = new TypeReference<Map<String, String>>() {};
+//        this.mapper = new ObjectMapper();
+//        this.typeRef = new TypeReference<Map<String, String>>() {};
         this.httpClient = HttpClientBuilder.create().build();
         this.dp = new DataProcessing() ;
+        
+        
+        try {
+			fw = new FileWriter(new File(context.applicationId() + "." + context.taskId() + ".txt"));
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(-1) ;
+		}
+  	  	bw = new BufferedWriter(fw);
+  	  	
+  	  	MainTopology.register(this) ;
+  	  	
         LOG.info("Processor initialized.");
         
     	
@@ -72,11 +84,16 @@ public class ProcessorData implements Processor<String, String, String, String> 
 
     	String result = "" ;
     	if ( MainTopology.isLocalProcessing ) {
-    		result = makeHttpRequestPost(MainTopology.urlBase, record.value() ) ;
+    		result = "LOCAL:" + dp.process( record.value() ) ;
     	} else {
-    		result = dp.process( record.value() ) ;
+    		result = "REMOTE:" + makeHttpRequestPost(MainTopology.urlBase, record.value() ) ;
     	}
     	t0 += System.nanoTime() ;
+    	try {
+			bw.write( ( "" + System.currentTimeMillis() + ", " + t0 + "\n").toCharArray());
+			bw.flush();
+		} catch (IOException e) {
+		}
     	System.out.println(t0) ;
 
     	Record<String, String> recordOut = new Record<String, String>(record.key(),

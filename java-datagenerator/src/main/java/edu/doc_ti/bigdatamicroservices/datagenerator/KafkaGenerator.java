@@ -109,12 +109,14 @@ public class KafkaGenerator {
         // create the producer
         KafkaProducer<String, String> producer = new KafkaProducer<>(properties);
 
+        int totalCount = 0 ;
         int secondsCount = 0 ;
         while ( secondsCount < maxSeconds ) {
         	long t0 = System.currentTimeMillis();
         	for ( int nn = 1 ; nn<= speed; nn++ ) {
+        		totalCount++ ;
                 ProducerRecord<String, String> producerRecord =
-                        new ProducerRecord<>(topic, MyCustomFaker.getData(1).replaceAll("\"", "").replace("\n", ""));
+                        new ProducerRecord<>(topic, MyCustomFaker.getDataClean(1));
                 producer.send(producerRecord);
         	}
             // flush data - synchronous
@@ -131,6 +133,8 @@ public class KafkaGenerator {
 
         }
         producer.close(); 
+        
+        log.info("Total records produced: "  + totalCount ); 
 
     }
 }
