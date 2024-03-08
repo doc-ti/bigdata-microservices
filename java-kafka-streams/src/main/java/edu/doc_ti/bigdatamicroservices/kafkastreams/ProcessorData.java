@@ -1,14 +1,15 @@
 package edu.doc_ti.bigdatamicroservices.kafkastreams;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.kafka.streams.processor.api.Processor;
@@ -20,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.doc_ti.bigdatamicroservices.data.DataProcessing;
+
 public class ProcessorData implements Processor<String, String, String, String> {
 	private static final Logger LOG = LoggerFactory.getLogger(ProcessorData.class);
 
@@ -28,13 +31,14 @@ public class ProcessorData implements Processor<String, String, String, String> 
    
     private HttpClient httpClient;
     
-    private ObjectMapper mapper;
-    
-//    String baseID = UUID.randomUUID().toString() ;
-    
+    @SuppressWarnings("unused")
+	private ObjectMapper mapper;
+    @SuppressWarnings("unused")
+	private TypeReference<Map<String, String>> typeRef;
     int counterRecords = 0 ;
 
-    private TypeReference<Map<String, String>> typeRef;
+	private DataProcessing dp;
+
    
 	@Override
     public void init(final ProcessorContext<String, String> context) {
@@ -43,6 +47,7 @@ public class ProcessorData implements Processor<String, String, String, String> 
         this.mapper = new ObjectMapper();
         this.typeRef = new TypeReference<Map<String, String>>() {};
         this.httpClient = HttpClientBuilder.create().build();
+        this.dp = new DataProcessing() ;
         LOG.info("Processor initialized.");
         
     	
@@ -61,32 +66,37 @@ public class ProcessorData implements Processor<String, String, String, String> 
     public void process(final Record<String, String> record) {
     	
     	counterRecords++ ;
-    	
     	System.out.println("INPUT: "  + record.value() ) ;
-//    	System.out.println( "THREAD: " + Thread.currentThread().getName() ) ;
     	
-//    	Record<String, String> recordOut = new Record<String, String>(record.key(),
-//    	    			Integer.toString( counterRecords) + ";" +
-//    	    			_context.recordMetadata().get().topic() + ":" + _context.recordMetadata().get().partition() + ":" + _context.recordMetadata().get().offset() + ";" +  
-//    	    			record.value(), record.timestamp()) ;
-//		_context.forward(recordOut);
-
     	long t0 = -System.nanoTime() ;
-    	makeHttpRequest(MainTopology.urlBase + "/bss/0") ;
+
+    	String result = "" ;
+    	if ( MainTopology.isLocalProcessing ) {
+    		result = makeHttpRequestPost(MainTopology.urlBase, record.value() ) ;
+    	} else {
+    		result = dp.process( record.value() ) ;
+    	}
     	t0 += System.nanoTime() ;
     	System.out.println(t0) ;
+
+    	Record<String, String> recordOut = new Record<String, String>(record.key(),
+//				_context.recordMetadata().get().topic() + ":" + _context.recordMetadata().get().partition() + ":" + _context.recordMetadata().get().offset() + ";" +  
+				result, System.currentTimeMillis() ) ;
     	
+    	_context.forward(recordOut);
     }
 
 
     public static void main(String[] args) {
-    	
-    	ProcessorData p = new ProcessorData() ;
+  
+    	String record = "7,10,019342,28305,COD_RANUP,86943504,18,3100043090631206,97.205.248.124,1255,11.48.240.193,dusty_sandmann,12345,34.18.111.4,287,66,959,268,7,700,4638,5,3,84,482,38,6,5,2024-03-08T14:10:47,2024-03-08T05:51:55,8,0,10.499,uebx28va86,1670464820,0,2,50,3100043389448771,1,3,6,6,5,01,0,9,3,6,AN,BE,CYK,DX66,9.67,7.04,12.34,2024-03-08T14:32:39,5G" ;
+     	ProcessorData p = new ProcessorData() ;
     	p.init(null);
     	
-    	for (int nn= 0 ; nn<100 ;nn++) {
+    	for (int nn= 0 ; nn<3 ;nn++) {
         	long t0 = -System.nanoTime() ;
-	    	String x = p.makeHttpRequest(MainTopology.urlBase + "/"+  auxArrHT [nn%auxArrHT.length]  +"/0") ;
+//	    	String x = p.makeHttpRequestGet(MainTopology.urlBase + "/"+  auxArrHT [nn%auxArrHT.length]  +"/0", "") ;
+	    	String x = p.makeHttpRequestPost(MainTopology.urlBase , record) ;
 	    	t0 += System.nanoTime() ;
 	    	if ( x != null ) {
 		    	System.out.println(x) ;
@@ -95,8 +105,8 @@ public class ProcessorData implements Processor<String, String, String, String> 
     	}
 	}
     
-    
-    private String makeHttpRequest(String url) {
+    @SuppressWarnings("unused")
+	private String makeHttpRequestGet(String url, String record) {
         HttpGet httpGet = new HttpGet(url);
 
         try {
@@ -108,6 +118,44 @@ public class ProcessorData implements Processor<String, String, String, String> 
                 if (entity != null && entity.getContentLength() != 0) {
                     // Formato JSON
                     String responseString = EntityUtils.toString(entity);
+                    return responseString ;
+//                    return this.mapper.readValue(responseString, this.typeRef);
+                } else {
+                    // Maneja el caso en que no haya contenido en la respuesta
+                    System.out.println("No content to map due to end-of-input for URL: " + url);
+                    LOG.error("No content to map due to end-of-input for URL: " + url);
+                    return null ;
+                }
+            } else {
+                System.out.println("Error: Received HTTP status code " + statusCode + " for URL: " + url);
+                LOG.error("Error: Received HTTP status code " + statusCode + " for URL: " + url);
+                return null ;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null ;        }
+    }    
+    
+    private String makeHttpRequestPost(String url, String record) {
+    	
+        HttpPost httpPost = new HttpPost(url);
+        StringEntity entityIn = null;
+		try {
+			entityIn = new StringEntity(record);
+		} catch (UnsupportedEncodingException e1) {}    	
+        httpPost.setEntity(entityIn);
+//        httpPost.setHeader("Accept", "application/json");
+//        httpPost.setHeader("Content-type", "application/json");
+    	
+        try {
+            HttpResponse response = httpClient.execute(httpPost);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode >= 200 && statusCode < 300) {
+                HttpEntity entityOut = response.getEntity();
+                // Asegúrate de que la entidad no sea null y que haya contenido para leer
+                if (entityOut != null && entityOut.getContentLength() != 0) {
+                    // Formato JSON
+                    String responseString = EntityUtils.toString(entityOut);
                     return responseString ;
 //                    return this.mapper.readValue(responseString, this.typeRef);
                 } else {

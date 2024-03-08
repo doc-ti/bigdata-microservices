@@ -39,12 +39,14 @@ import org.apache.kafka.streams.Topology;
 public class MainTopology {
 	public static int numRecords = 5000 ;
 	
-	public static String urlBase = "http://localhost:8080/api-rest/search" ;
+	public static String urlBase = "http://localhost:8080/api-rest/process/" ;
+
+	static boolean isLocalProcessing = false;
 
     public static void main(String[] args) {
     	
-		String topicIn = "topic_in_stream" ; 
-		String topicOut = "topic_out_data" ; 
+		String topicIn = "topic_in_microserv" ; 
+		String topicOut = "topic_out_microserv" ; 
 		String bootstrapServers = "127.0.0.1:9092" ;
 		int numThreads = 1 ;
 		
@@ -52,10 +54,9 @@ public class MainTopology {
 		options.addOption(new Option("h", "help", false, "Print this help"));
 		options.addOption(new Option("b", "broker", true, "List of kafka bootstrap servers (def: " + bootstrapServers + ")"));
 		options.addOption(new Option("t", "topic_in", true, "Input topic name (default: " + topicIn + ")"));
-		options.addOption(new Option("u", "url", true, "URL base (default: " + urlBase + ")"));
-		options.addOption(new Option("h", "threads", true, "Number of threads (default: " + numThreads + ")"));
-//		options.addOption(new Option("o", "topic_out", true, "Output topic name (default: " + topicOut + ")"));
-    	
+		options.addOption(new Option("u", "url", true, "URL base (default: " + urlBase + "), 'local' for local processing of data"));
+		options.addOption(new Option("n", "threads", true, "Number of threads (default: " + numThreads + " )"));
+		options.addOption(new Option("o", "topic_out", true, "Output topic name (default: " + topicOut + ")"));
     	
 		
 		CommandLineParser parser = new DefaultParser();
@@ -72,19 +73,6 @@ public class MainTopology {
 			formatter.printHelp("MainTopology", options);
 			System.exit(0) ;
 		}
-       
-		if ( cmd.hasOption('t')  ) {
-			try {
-				topicIn = cmd.getParsedOptionValue("t").toString() ;
-			} catch (Exception e) {
-			}
-		} 
-		if ( cmd.hasOption('o')  ) {
-			try {
-				topicOut = cmd.getParsedOptionValue("o").toString() ;
-			} catch (Exception e) {
-			}
-		}
 		
 		if ( cmd.hasOption('b')  ) {
 			try {
@@ -92,14 +80,39 @@ public class MainTopology {
 			} catch (Exception e) {
 			}
 		}
+       
+		if ( cmd.hasOption('t')  ) {
+			try {
+				topicIn = cmd.getParsedOptionValue("t").toString() ;
+			} catch (Exception e) {
+			}
+		}
 		
-		if ( cmd.hasOption('h')  ) {
+		if ( cmd.hasOption('u')  ) {
+			try {
+				urlBase = cmd.getParsedOptionValue("u").toString() ;
+			} catch (Exception e) {
+			}
+		}
+		
+		isLocalProcessing  =  (urlBase.compareToIgnoreCase("local") == 0 );
+
+		if ( cmd.hasOption('n')  ) {
 			try {
 				numThreads = Integer.parseInt( cmd.getParsedOptionValue("h").toString() ) ;
 			} catch (Exception e) {
 			}
 		}		
-        Properties props = new Properties();
+
+		if ( cmd.hasOption('o')  ) {
+			try {
+				topicOut = cmd.getParsedOptionValue("o").toString() ;
+			} catch (Exception e) {
+			}
+		}
+		
+		
+		Properties props = new Properties();
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, "microservice-test-" + System.currentTimeMillis() );
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
