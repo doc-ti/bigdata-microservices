@@ -49,9 +49,22 @@ public class ProcessorData implements Processor<String, String, String, String> 
         this.httpClient = HttpClientBuilder.create().build();
         this.dp = new DataProcessing() ;
         
+
+        String host = MainTopology.urlBase ;
+        
+        if ( !MainTopology.isLocalProcessing ) {
+        	String aux[] = host.split("/") ;
+        	host = aux[2];
+        	int pos = host.indexOf(":") ;
+        	host = host.substring(0,pos) ;
+        }
+        
         
         try {
-			fw = new FileWriter(new File(context.applicationId() + "." + context.taskId() + ".txt"));
+        	File dir = new File ( context.applicationId() + ".th_" + MainTopology.numThreads + "." + host) ;
+        	dir.mkdir();
+        	
+			fw = new FileWriter(new File(dir, context.applicationId() + "." + context.taskId() + ".th_" + MainTopology.numThreads + "." + host + ".txt"));
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(-1) ;
@@ -78,7 +91,11 @@ public class ProcessorData implements Processor<String, String, String, String> 
     public void process(final Record<String, String> record) {
     	
     	counterRecords++ ;
-    	System.out.println("INPUT: "  + record.value() ) ;
+//    	System.out.println("INPUT: "  + record.value() ) ;
+    	
+    	if ( counterRecords%1000 == 0 ) {
+    		LOG.info("Procesed " + counterRecords + " in task:" + _context.taskId() );
+    	}
     	
     	long t0 = -System.nanoTime() ;
 
@@ -86,15 +103,15 @@ public class ProcessorData implements Processor<String, String, String, String> 
     	if ( MainTopology.isLocalProcessing ) {
     		result = "LOCAL:" + dp.process( record.value() ) ;
     	} else {
-    		result = "REMOTE:" + makeHttpRequestPost(MainTopology.urlBase, record.value() ) ;
+    		result = "REMOTE:" + makeHttpRequestPost(MainTopology.urlBase, "record=" + record.value() ) ;
     	}
     	t0 += System.nanoTime() ;
     	try {
-			bw.write( ( "" + System.currentTimeMillis() + ", " + t0 + "\n").toCharArray());
+			bw.write( ( "" + System.currentTimeMillis() + " " + t0 + "\n").toCharArray());
 			bw.flush();
 		} catch (IOException e) {
 		}
-    	System.out.println(t0) ;
+//    	System.out.println(t0) ;
 
     	Record<String, String> recordOut = new Record<String, String>(record.key(),
 //				_context.recordMetadata().get().topic() + ":" + _context.recordMetadata().get().partition() + ":" + _context.recordMetadata().get().offset() + ";" +  

@@ -21,9 +21,17 @@ public class DataProcessing {
 	@SuppressWarnings("unchecked")
 	public String process(String input) {
 		
+		String inputMod = input ;
+		if ( inputMod.startsWith("record=") ) {
+			inputMod = input.substring(7) ;
+		}
+		if ( inputMod.startsWith("data=") ) {
+			inputMod = input.substring(5) ;
+		}
+		
 		JSONObject json= new JSONObject();
 
-		String fields[] = input.split(",") ;
+		String fields[] = inputMod.split(",") ;
 		
 		if ( fields.length == fieldNames.length ) {
 			for ( int pos = 0 ; pos < fields.length ; pos++) {

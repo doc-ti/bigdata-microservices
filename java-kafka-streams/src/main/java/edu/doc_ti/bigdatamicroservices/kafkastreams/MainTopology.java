@@ -48,6 +48,7 @@ public class MainTopology {
 
 	static boolean isLocalProcessing = false;
 	static SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+	static int numThreads = 1 ;
 	
 
 	private static ArrayList<ProcessorData> arrProcesors = new ArrayList<ProcessorData>();
@@ -57,7 +58,6 @@ public class MainTopology {
 		String topicIn = "topic_in_microserv" ; 
 		String topicOut = "topic_out_microserv" ; 
 		String bootstrapServers = "127.0.0.1:9092" ;
-		int numThreads = 1 ;
 		
 		Options options = new Options();
 		options.addOption(new Option("h", "help", false, "Print this help"));
