@@ -133,8 +133,8 @@ public class ProcessorData implements Processor<String, String, String, String> 
 //	    	String x = p.makeHttpRequestGet(MainTopology.urlBase + "/"+  auxArrHT [nn%auxArrHT.length]  +"/0", "") ;
 //	    	String x = p.makeHttpRequestPost(MainTopology.urlBase , record) ;
 //	    	String x = p.makeHttpRequestPost("http://192.168.80.33:8080/process" , record) ;
-//	    	String x = p.makeHttpRequestPost("http://localhost:8080/process" , record) ;
-	    	String x = p.makeHttpRequestGet("http://localhost:8080/process" , record) ;
+	    	String x = p.makeHttpRequestPost("http://localhost:8081/process" , record) ;
+//	    	String x = p.makeHttpRequestGet("http://localhost:8081/process" , record) ;
 	    	t0 += System.nanoTime() ;
 	    	if ( x != null ) {
 		    	System.out.println(x) ;

@@ -77,6 +77,11 @@
     <version>1.2.17</version>
 </dependency>
 
+                <dependency>
+                        <groupId>commons-cli</groupId>
+                        <artifactId>commons-cli</artifactId>
+                        <version>1.5.0</version>
+                </dependency>
 
         <!-- JUnit 5 -->
         <dependency>
@@ -143,6 +148,23 @@
                     </execution>
                 </executions>
             </plugin>
+       <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <filters>
+            <filter>src/assembly/filter.properties</filter>
+          </filters>
+         <archive>
+          <manifest>
+            <mainClass>edu.doc_ti.bigdatamicroservices.jersey3.MainApp</mainClass>
+          </manifest>
+        </archive> 
+	  <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+      </plugin>
 
         </plugins>
     </build>
