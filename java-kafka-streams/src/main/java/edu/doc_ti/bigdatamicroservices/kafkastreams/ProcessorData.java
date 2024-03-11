@@ -133,7 +133,8 @@ public class ProcessorData implements Processor<String, String, String, String> 
 //	    	String x = p.makeHttpRequestGet(MainTopology.urlBase + "/"+  auxArrHT [nn%auxArrHT.length]  +"/0", "") ;
 //	    	String x = p.makeHttpRequestPost(MainTopology.urlBase , record) ;
 //	    	String x = p.makeHttpRequestPost("http://192.168.80.33:8080/process" , record) ;
-	    	String x = p.makeHttpRequestPost("http://192.168.80.33:8080/process" , record) ;
+//	    	String x = p.makeHttpRequestPost("http://localhost:8080/process" , record) ;
+	    	String x = p.makeHttpRequestGet("http://localhost:8080/process" , record) ;
 	    	t0 += System.nanoTime() ;
 	    	if ( x != null ) {
 		    	System.out.println(x) ;
@@ -151,7 +152,7 @@ public class ProcessorData implements Processor<String, String, String, String> 
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode >= 200 && statusCode < 300) {
                 HttpEntity entity = response.getEntity();
-                // Asegúrate de que la entidad no sea null y que haya contenido para leer
+                // Asegï¿½rate de que la entidad no sea null y que haya contenido para leer
                 if (entity != null && entity.getContentLength() != 0) {
                     // Formato JSON
                     String responseString = EntityUtils.toString(entity);
@@ -190,7 +191,7 @@ public class ProcessorData implements Processor<String, String, String, String> 
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode >= 200 && statusCode < 300) {
                 HttpEntity entityOut = response.getEntity();
-                // Asegúrate de que la entidad no sea null y que haya contenido para leer
+                // Asegï¿½rate de que la entidad no sea null y que haya contenido para leer
                 if (entityOut != null && entityOut.getContentLength() != 0) {
                     // Formato JSON
                     String responseString = EntityUtils.toString(entityOut);
