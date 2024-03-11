@@ -125,12 +125,15 @@ public class ProcessorData implements Processor<String, String, String, String> 
   
     	String record = "7,10,019342,28305,COD_RANUP,86943504,18,3100043090631206,97.205.248.124,1255,11.48.240.193,dusty_sandmann,12345,34.18.111.4,287,66,959,268,7,700,4638,5,3,84,482,38,6,5,2024-03-08T14:10:47,2024-03-08T05:51:55,8,0,10.499,uebx28va86,1670464820,0,2,50,3100043389448771,1,3,6,6,5,01,0,9,3,6,AN,BE,CYK,DX66,9.67,7.04,12.34,2024-03-08T14:32:39,5G" ;
      	ProcessorData p = new ProcessorData() ;
-    	p.init(null);
+        p.httpClient = HttpClientBuilder.create().build();
+
     	
     	for (int nn= 0 ; nn<3 ;nn++) {
         	long t0 = -System.nanoTime() ;
 //	    	String x = p.makeHttpRequestGet(MainTopology.urlBase + "/"+  auxArrHT [nn%auxArrHT.length]  +"/0", "") ;
-	    	String x = p.makeHttpRequestPost(MainTopology.urlBase , record) ;
+//	    	String x = p.makeHttpRequestPost(MainTopology.urlBase , record) ;
+//	    	String x = p.makeHttpRequestPost("http://192.168.80.33:8080/process" , record) ;
+	    	String x = p.makeHttpRequestPost("http://192.168.80.33:8080/process" , record) ;
 	    	t0 += System.nanoTime() ;
 	    	if ( x != null ) {
 		    	System.out.println(x) ;
@@ -141,10 +144,10 @@ public class ProcessorData implements Processor<String, String, String, String> 
     
     @SuppressWarnings("unused")
 	private String makeHttpRequestGet(String url, String record) {
-        HttpGet httpGet = new HttpGet(url);
+        HttpGet httpGet = new HttpGet(url+ "?record=" + record);
 
         try {
-            HttpResponse response = httpClient.execute(httpGet);
+            HttpResponse response = httpClient.execute(httpGet );
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode >= 200 && statusCode < 300) {
                 HttpEntity entity = response.getEntity();
@@ -175,9 +178,10 @@ public class ProcessorData implements Processor<String, String, String, String> 
         HttpPost httpPost = new HttpPost(url);
         StringEntity entityIn = null;
 		try {
-			entityIn = new StringEntity(record);
+			entityIn = new StringEntity("record="+record);
 		} catch (UnsupportedEncodingException e1) {}    	
-        httpPost.setEntity(entityIn);
+
+		httpPost.setEntity(entityIn);
 //        httpPost.setHeader("Accept", "application/json");
 //        httpPost.setHeader("Content-type", "application/json");
     	
