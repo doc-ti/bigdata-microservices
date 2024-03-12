@@ -140,7 +140,8 @@ public class ProcessorData implements Processor<String, String, String, String> 
     	for (int nn= 0 ; nn<1 ;nn++) {
 
 //        	String URL= "http://localhost:8089" ;
-        	String URL= "http://localhost:8080" ;
+//        	String URL= "http://localhost:8080" ;
+        	String URL= "http://localhost:8081" ;
         	
         	String auxS[] = {"/identify", "/process"} ;
 	    	String x = "";
