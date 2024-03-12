@@ -20,9 +20,14 @@
           <filters>
             <filter>src/assembly/filter.properties</filter>
           </filters>
-          <descriptors>
-            <descriptor>dep.xml</descriptor>
-          </descriptors>
+          <archive>
+            <manifest>
+              <mainClass>edu.doc_ti.bigdatamicroservices.datagenerator.KafkaGenerator</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
 
         </configuration>
       </plugin>
