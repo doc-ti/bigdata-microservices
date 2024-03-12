@@ -138,7 +138,6 @@ public class ProcessorData implements Processor<String, String, String, String> 
 //	    	String x = p.makeHttpRequestGet("http://localhost:8081/process" , record) ;
 
     	for (int nn= 0 ; nn<1 ;nn++) {
-        	long t0 = -System.nanoTime() ;
 
 //        	String URL= "http://localhost:8089" ;
         	String URL= "http://localhost:8080" ;
@@ -146,6 +145,7 @@ public class ProcessorData implements Processor<String, String, String, String> 
         	String auxS[] = {"/identify", "/process"} ;
 	    	String x = "";
         	for (String aux : auxS) { 
+            	long t0 = -System.nanoTime() ;
 	        	x = p.makeHttpRequestGet(URL + aux , record) ;
 		    	t0 += System.nanoTime() ;
 		    	if ( x != null ) {
@@ -153,6 +153,7 @@ public class ProcessorData implements Processor<String, String, String, String> 
 		    	}
 		    	System.out.println(t0/1000) ;
 
+	        	t0 = -System.nanoTime() ;
 		    	x = p.makeHttpRequestPost(URL + aux , record) ;
 		    	t0 += System.nanoTime() ;
 		    	if ( x != null ) {

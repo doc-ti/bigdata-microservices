@@ -5,7 +5,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 
 
-@Path("/identity")
+@Path("/identify")
 public class IdentityService {
  
 	String IDENT="jersey3" ;
