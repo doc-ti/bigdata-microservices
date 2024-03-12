@@ -19,41 +19,45 @@ fieldNames = [
 	"field_49",	"field_50",		"field_51",	"field_52",	"field_53",	"field_54"
 	]
 
-# Define a route for the root URL '/'
-@app.route('/')
-def hello():
-    return 'Hello, World!'
+IDENT='flask' 
+
+@app.route('/identify', methods=['GET', 'POST'])
+def identify():
+    return IDENT
 
 
-# Define a route for '/api/echo' that accepts GET requests with parameters
 @app.route('/process', methods=['GET'])
 def echo_get():
-    # Get parameters from the query string
-    name = request.args.get('name')
-    age = request.args.get('age')
-    city = request.args.get('city')
+    data = request.args.get('record')
+#    print ( data)
 
-    # Create a dictionary with the received parameters
-    data = {
-        'name': name,
-        'age': age,
-        'city': city
-    }
-    return jsonify(data)
+    myfields = data.split(',')
+
+    out = {  }
+#    out["len"] = len(myfields)
+#    out["len2"] = len(fieldNames)
+
+    if ( len(myfields) >= len (fieldNames) ) :
+        for index in range(0, len (fieldNames)) :
+           out[fieldNames[index]] = myfields[index]
+
+        for index in range(0, 6) :
+           htAux = mapsData[arrayMaps[index]]
+#           out[arrayMaps[index]] = myfields[index]
+           out[arrayMaps[index]] = htAux[myfields[index]]
+
+    # Return the received data
+    return jsonify(out)
+
 
 # Define a route for '/api/echo' that accepts POST requests with parameters
 @app.route('/process', methods=['POST'])
 def echo_post():
-    data = request.args
-    print ( data)
-    data = request.form
-    print ( data)
-    data = request.json
-    print ( data)
-    data = request.form.get('record')
-    print (data)
+    data = request.data.decode('utf-8').replace('record=', '')
+#    print (data) 
 
     myfields = data.split(',')
+
 
     out = {  }
 #    out["len"] = len(myfields)
