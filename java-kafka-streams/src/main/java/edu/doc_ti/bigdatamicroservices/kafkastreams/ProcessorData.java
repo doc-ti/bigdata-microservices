@@ -54,14 +54,15 @@ public class ProcessorData implements Processor<String, String, String, String> 
         
         if ( !MainTopology.isLocalProcessing ) {
         	String aux[] = host.split("/") ;
-        	host = aux[2];
-        	int pos = host.indexOf(":") ;
-        	host = host.substring(0,pos) ;
+        	host = aux[2].replace(':', '-') ;
         }
         
         
         try {
-        	File dir = new File ( context.applicationId() + ".th_" + MainTopology.numThreads + "." + host) ;
+        	
+        	String serverType = makeHttpRequestGet(MainTopology.urlBase + "/identify", "") ;
+        	
+        	File dir = new File ( context.applicationId() + ".threads_" + MainTopology.numThreads + "." + host + "." + serverType) ;
         	dir.mkdir();
         	
 			fw = new FileWriter(new File(dir, context.applicationId() + "." + context.taskId() + ".th_" + MainTopology.numThreads + "." + host + ".txt"));
@@ -91,7 +92,6 @@ public class ProcessorData implements Processor<String, String, String, String> 
     public void process(final Record<String, String> record) {
     	
     	counterRecords++ ;
-//    	System.out.println("INPUT: "  + record.value() ) ;
     	
     	if ( counterRecords%1000 == 0 ) {
     		LOG.info("Procesed " + counterRecords + " in task:" + _context.taskId() );
@@ -101,9 +101,9 @@ public class ProcessorData implements Processor<String, String, String, String> 
 
     	String result = "" ;
     	if ( MainTopology.isLocalProcessing ) {
-    		result = "LOCAL:" + dp.process( record.value() ) ;
+    		result = dp.process( record.value() ) ;
     	} else {
-    		result = "REMOTE:" + makeHttpRequestPost(MainTopology.urlBase, "record=" + record.value() ) ;
+    		result = makeHttpRequestPost(MainTopology.urlBase + "/process", "record=" + record.value() ) ;
     	}
     	t0 += System.nanoTime() ;
     	try {
@@ -128,19 +128,9 @@ public class ProcessorData implements Processor<String, String, String, String> 
         p.httpClient = HttpClientBuilder.create().build();
 
 
-//	    	String x = p.makeHttpRequestGet(MainTopology.urlBase + "/"+  auxArrHT [nn%auxArrHT.length]  +"/0", "") ;
-//	    	String x = p.makeHttpRequestPost(MainTopology.urlBase , record) ;
-//	    	String x = p.makeHttpRequestPost("http://192.168.80.33:8080/process" , record) ;
-        	
-//        	String x = p.makeHttpRequestPost("http://localhost:8081/process" , record) ;
-//        	String x = p.makeHttpRequestPost("http://192.168.80.38:8080/api-rest/process" , record) ;
-//        	String x = p.makeHttpRequestGet("http://192.168.80.38:8080/api-rest/process" , record) ;
-//	    	String x = p.makeHttpRequestGet("http://localhost:8081/process" , record) ;
 
     	for (int nn= 0 ; nn<1 ;nn++) {
 
-//        	String URL= "http://localhost:8089" ;
-//        	String URL= "http://localhost:8080" ;
 //        	String URL= "http://localhost:8080" ;
 //        	String URL= "http://localhost:8080/api-rest" ;
         	String URL = "http://192.168.80.32:8080" ;

@@ -44,7 +44,7 @@ import edu.doc_ti.bigdatamicroservices.data.LookupData;
  */
 public class MainTopology {
 	
-	public static String urlBase = "http://localhost:8080/api-rest/process/" ;
+	public static String urlBase = "http://localhost:8080" ;
 
 	static boolean isLocalProcessing = false;
 	static SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
