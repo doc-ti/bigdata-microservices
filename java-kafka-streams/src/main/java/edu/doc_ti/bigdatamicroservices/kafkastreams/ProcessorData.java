@@ -127,22 +127,39 @@ public class ProcessorData implements Processor<String, String, String, String> 
      	ProcessorData p = new ProcessorData() ;
         p.httpClient = HttpClientBuilder.create().build();
 
-    	
-    	for (int nn= 0 ; nn<3 ;nn++) {
-        	long t0 = -System.nanoTime() ;
+
 //	    	String x = p.makeHttpRequestGet(MainTopology.urlBase + "/"+  auxArrHT [nn%auxArrHT.length]  +"/0", "") ;
 //	    	String x = p.makeHttpRequestPost(MainTopology.urlBase , record) ;
 //	    	String x = p.makeHttpRequestPost("http://192.168.80.33:8080/process" , record) ;
         	
 //        	String x = p.makeHttpRequestPost("http://localhost:8081/process" , record) ;
 //        	String x = p.makeHttpRequestPost("http://192.168.80.38:8080/api-rest/process" , record) ;
-        	String x = p.makeHttpRequestGet("http://192.168.80.38:8080/api-rest/process" , record) ;
+//        	String x = p.makeHttpRequestGet("http://192.168.80.38:8080/api-rest/process" , record) ;
 //	    	String x = p.makeHttpRequestGet("http://localhost:8081/process" , record) ;
-	    	t0 += System.nanoTime() ;
-	    	if ( x != null ) {
-		    	System.out.println(x) ;
-	    	}
-	    	System.out.println(t0/1000) ;
+
+    	for (int nn= 0 ; nn<1 ;nn++) {
+        	long t0 = -System.nanoTime() ;
+
+//        	String URL= "http://localhost:8089" ;
+        	String URL= "http://localhost:8080" ;
+        	
+        	String auxS[] = {"/identify", "/process"} ;
+	    	String x = "";
+        	for (String aux : auxS) { 
+	        	x = p.makeHttpRequestGet(URL + aux , record) ;
+		    	t0 += System.nanoTime() ;
+		    	if ( x != null ) {
+			    	System.out.println(x) ;
+		    	}
+		    	System.out.println(t0/1000) ;
+
+		    	x = p.makeHttpRequestPost(URL + aux , record) ;
+		    	t0 += System.nanoTime() ;
+		    	if ( x != null ) {
+			    	System.out.println(x) ;
+		    	}
+		    	System.out.println(t0/1000) ;
+        	}
     	}
 	}
     

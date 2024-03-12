@@ -14,17 +14,6 @@ import edu.doc_ti.bigdatamicroservices.ws_spring.resource.DataProcessing;
 
 @RestController
 public class ProcessService {
-
-	@GetMapping("/identify")
-    public String identGet()  {
-        return "jersey3";
-    }
-
-	@PostMapping("/identify")
-    public String identPost()  {
-        return "jersey3";
-    }
-	
 	
 	@GetMapping("/process")
     public String processGet(
