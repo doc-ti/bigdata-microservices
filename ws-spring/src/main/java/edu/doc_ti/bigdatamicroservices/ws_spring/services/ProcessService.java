@@ -1,4 +1,4 @@
-package edu.doc_ti.bigdatamicroservices.ws_spring;
+package edu.doc_ti.bigdatamicroservices.ws_spring.services;
 
 import org.json.JSONException;
 import org.springframework.web.bind.annotation.GetMapping;

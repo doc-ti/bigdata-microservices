@@ -10,7 +10,6 @@ public class WsSpringApplication {
 
 	public static void main(String[] args) {
 		
-		
 		SpringApplication.run(WsSpringApplication.class, args);
 		@SuppressWarnings("unused")
 		int aux = LookupData.namesHT.length ;
