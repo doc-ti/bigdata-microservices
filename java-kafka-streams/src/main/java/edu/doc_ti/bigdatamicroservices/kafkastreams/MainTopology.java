@@ -33,6 +33,8 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.doc_ti.bigdatamicroservices.data.LookupData;
 
@@ -43,6 +45,9 @@ import edu.doc_ti.bigdatamicroservices.data.LookupData;
  * each record represents a single word.
  */
 public class MainTopology {
+
+	
+	private static final Logger LOG = LoggerFactory.getLogger(MainTopology.class);
 	
 	public static String urlBase = "http://localhost:8080" ;
 
@@ -143,6 +148,53 @@ public class MainTopology {
      
         final CountDownLatch latch = new CountDownLatch(1);
 
+        Thread thControl = new Thread("control-thread") {
+            @Override
+            public void run() {
+            	int recordsLast = -1 ;
+            	long lastTS = System.currentTimeMillis();
+            	
+            	int recordsNew = 0 ;
+            	boolean exit = false ;
+            	while ( ! exit ) {
+            		try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {}
+            		recordsLast = recordsNew ;
+
+            		recordsLast = recordsNew ;
+        			recordsNew = 0 ;
+            		for ( ProcessorData p: arrProcesors ) {
+            			recordsNew += p.counterRecords ;
+            		}
+            		
+            		LOG.info("Total of records: " + recordsNew);
+            		
+            		if (( recordsNew > recordsLast )) {
+                    	lastTS = System.currentTimeMillis();
+            		} else {
+            			if ( System.currentTimeMillis() - lastTS > 20000) {
+            				exit = true ;
+            				LOG.info("Exiting, 20 seconds without activity");
+            			}
+            		}
+            	}
+            	
+            	
+                streams.close();
+                latch.countDown();
+                
+        		try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e) {}
+        		
+        		System.exit(0);
+
+            }
+        } ;
+        
+        thControl.start(); 
+        
         // attach shutdown handler to catch control-c
         Runtime.getRuntime().addShutdownHook(new Thread("streams-shutdown-hook") {
             @Override
@@ -172,8 +224,7 @@ public class MainTopology {
     }
 
 	public static void register(ProcessorData processorData) {
-		
 		arrProcesors .add(processorData) ;
-		
 	}
+	
 }

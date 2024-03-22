@@ -185,6 +185,13 @@ public class ProcessorData implements Processor<String, String, String, String> 
             }
         } catch (IOException e) {
             e.printStackTrace();
+            if (e.getMessage().contains("Connection refused")) {
+            	try {
+        			bw.write( ( "ERROR CONNECTION!\n").toCharArray());
+        			bw.flush();
+        		} catch (Exception ex) {}
+            	System.exit(-1);
+            }
             return null ;        }
     }    
     
@@ -224,6 +231,13 @@ public class ProcessorData implements Processor<String, String, String, String> 
             }
         } catch (IOException e) {
             e.printStackTrace();
+            if (e.getMessage().contains("Connection refused")) {
+            	try {
+        			bw.write( ( "ERROR CONNECTION!\n").toCharArray());
+        			bw.flush();
+        		} catch (IOException ex) {}
+            	System.exit(-1);
+            }
             return null ;        }
     }    
     

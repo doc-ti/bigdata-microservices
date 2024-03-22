@@ -16,8 +16,10 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import edu.doc_ti.bigdatamicroservices.jersey3.config.AutoScanFeature;
 import edu.doc_ti.bigdatamicroservices.jersey3.resource.LookupData;
+import edu.doc_ti.bigdatamicroservices.jersey3.service.DummyService;
 import edu.doc_ti.bigdatamicroservices.jersey3.service.IdentityService;
 import edu.doc_ti.bigdatamicroservices.jersey3.service.ProcessService;
+import edu.doc_ti.bigdatamicroservices.jersey3.service.SearchService;
 
 public class MainApp {
 
@@ -75,7 +77,9 @@ public class MainApp {
         final ResourceConfig config = new ResourceConfig();
         // config.packages(true, "com.mkyong");
         config.register(ProcessService.class);
+        config.register(DummyService.class);
         config.register(IdentityService.class);
+        config.register(SearchService.class);
 
         // enable auto scan @Contract and @Service
         config.register(AutoScanFeature.class);

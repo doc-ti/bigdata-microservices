@@ -6,20 +6,18 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 
 
-@Path("/identity")
-public class IdentityService {
+@Path("/dummy")
+public class DummyService {
  
-	String IDENT="jersey3" ;
-	
     @GET
     public String identGet()  {
-        return IDENT;
+        return "OK";
     }
        
     @POST
     @Produces("application/json")
     public String identPost() {
-        return IDENT;
+        return "OK";
     }
     
 }

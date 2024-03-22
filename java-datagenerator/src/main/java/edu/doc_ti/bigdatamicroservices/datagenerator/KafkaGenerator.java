@@ -72,9 +72,9 @@ public class KafkaGenerator {
 			}
 		} 
 		
-		if (speed > 10000) {
-			speed = 10000 ;
-		}
+//		if (speed > 10000) {
+//			speed = 10000 ;
+//		}
 		
 		if ( cmd.hasOption('t')  ) {
 			try {
