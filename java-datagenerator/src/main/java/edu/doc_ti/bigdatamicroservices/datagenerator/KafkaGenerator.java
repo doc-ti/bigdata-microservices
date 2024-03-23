@@ -18,15 +18,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class KafkaGenerator {
-    private static final Logger log = LoggerFactory.getLogger(KafkaGenerator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KafkaGenerator.class);
 
     public static void main(String[] args) {
-        log.info("I am a Kafka Producer");
+        LOG.info("I am a Kafka Producer");
 
         int speed = 500 ;
         int maxSeconds = 10 ; 
         String bootstrapServers = "127.0.0.1:9092";
-        String topic = "topic_in_stream" ;
+        String topic = "topic_in_microserv" ;
         
 		Options options = new Options();
 		
@@ -112,6 +112,7 @@ public class KafkaGenerator {
         int totalCount = 0 ;
         int secondsCount = 0 ;
         while ( secondsCount < maxSeconds ) {
+            LOG.info("Generating "+ (speed) + " records") ;
         	long t0 = System.currentTimeMillis();
         	for ( int nn = 1 ; nn<= speed; nn++ ) {
         		totalCount++ ;
@@ -122,11 +123,17 @@ public class KafkaGenerator {
             // flush data - synchronous
             producer.flush();
             
-            log.info("Flush to " + topic + " "+ speed + " records") ;
+            LOG.info("Flush to " + topic + " "+ speed + " records") ;
+            
+            long taux = (1000 - System.currentTimeMillis() + t0);
+            if ( taux > 0 ) {
+                LOG.info("Waiting for "+ taux + "  ms. ") ;
+            }
             
             while (System.currentTimeMillis() - t0 < 1000) {
+            	
             	try {
-					Thread.sleep(1) ;
+					Thread.sleep(0, 100); ;
 				} catch (InterruptedException e) {}
             }
             secondsCount++ ;
@@ -134,7 +141,7 @@ public class KafkaGenerator {
         }
         producer.close(); 
         
-        log.info("Total records produced: "  + totalCount ); 
+        LOG.info("Total records produced: "  + totalCount ); 
 
     }
 }

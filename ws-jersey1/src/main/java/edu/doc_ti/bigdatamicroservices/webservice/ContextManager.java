@@ -14,17 +14,11 @@ public class ContextManager implements ServletContextListener {
 
 	final static Logger LOG = Logger.getLogger(ContextManager.class);
 	
-
-
-	
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-    	
     	LOG.info("LOGGING: starting app");
     	System.out.println("LOGGING: starting app ------------------------------------------------");
-    	
     	LookupData.htMain.size() ; 
-    	
     }
 
     @Override

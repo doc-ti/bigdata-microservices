@@ -8,7 +8,7 @@ import javax.ws.rs.core.Response;
 
 import org.json.JSONException;
 
-@Path("/identify")
+@Path("/identity")
 public class IdentityService {
  
 	final static String IDENT = "jersey1" ; 

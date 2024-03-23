@@ -51,12 +51,22 @@ public class MainTopology {
 	
 	public static String urlBase = "http://localhost:8080" ;
 
-	static boolean isLocalProcessing = false;
 	static SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
 	static int numThreads = 1 ;
 	
+	static final int MODE_FULL = 1 ;
+	static final int MODE_DUMMY = 2 ;
+	static final int MODE_SEARCH = 3 ;
+	static final int MODE_LOCAL = 4 ;
+	
+	public static int NUM_DUMMYS=1 ;
+	
+	public static int mode = MODE_FULL ;
+	
 
 	private static ArrayList<ProcessorData> arrProcesors = new ArrayList<ProcessorData>();
+
+	public static String modeString = "full";
 
     public static void main(String[] args) {
     	
@@ -71,6 +81,7 @@ public class MainTopology {
 		options.addOption(new Option("u", "url", true, "URL base (default: " + urlBase + "), 'local' for local processing of data"));
 		options.addOption(new Option("n", "threads", true, "Number of threads (default: " + numThreads + " )"));
 		options.addOption(new Option("o", "topic_out", true, "Output topic name (default: " + topicOut + ")"));
+		options.addOption(new Option("m", "mode", true, "Mode [f: full record, dN: N dummy calls, s: only searchs, l: local (no microservice)] (default: f)"));
     	
 		
 		CommandLineParser parser = new DefaultParser();
@@ -95,6 +106,34 @@ public class MainTopology {
 			}
 		}
        
+		if ( cmd.hasOption('m')  ) {
+			try {
+				String aux = cmd.getParsedOptionValue("m").toString() ;
+				if ( aux.compareToIgnoreCase("f") == 0 ) {
+					mode = MODE_FULL ;
+					modeString = "full" ;
+				}
+				if ( aux.compareToIgnoreCase("l") == 0 ) {
+					mode = MODE_LOCAL ;
+					modeString = "local" ;
+				}
+				LookupData.htMain.size();
+				
+				if ( aux.compareToIgnoreCase("s") == 0 ) {
+					mode = MODE_SEARCH;
+					modeString = "search" ;
+				}
+				if ( aux.substring(0,1).compareToIgnoreCase("d") == 0 ) {
+					mode = MODE_DUMMY ;
+					try {
+						NUM_DUMMYS = Integer.parseInt(aux.substring(1)) ;
+					} catch (Exception ex) {}
+					modeString  = "dummys_" + NUM_DUMMYS ;
+				}
+			} catch (Exception e) {
+			}
+		}
+       
 		if ( cmd.hasOption('t')  ) {
 			try {
 				topicIn = cmd.getParsedOptionValue("t").toString() ;
@@ -109,9 +148,7 @@ public class MainTopology {
 			}
 		}
 		
-		isLocalProcessing  =  (urlBase.compareToIgnoreCase("local") == 0 );
-		
-		if ( isLocalProcessing ) {
+		if ( mode == MODE_LOCAL ) {
 			LookupData.htMain.size();
 		}
 

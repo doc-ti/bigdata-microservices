@@ -1,36 +1,33 @@
-package edu.doc_ti.bigdatamicroservices.jersey3.service;
+package edu.doc_ti.bigdatamicroservices.webservice;
 
 import java.util.Hashtable;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+
 import org.json.JSONException;
 
-import edu.doc_ti.bigdatamicroservices.jersey3.resource.LookupData;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-
+import edu.doc_ti.bigdatamicroservices.data.LookupData;
 
 @Path("/search")
 public class SearchService {
  
+
 	private static final String TABLE_NOT_FOUND = "Table not found";
 	private static final String DEFAULT="N/A" ;
 	
 	
-	String process(String table, String key ) {
+	String process(String table, String id ) {
 		
     	String result = DEFAULT ;
-    	if ( table != null && key != null ) {
+    	if ( table != null && id != null ) {
     		Hashtable<String, String> htab = LookupData.htMain.get(table) ;
     		if (htab != null ) {
-    			String keyAux = key ;
-    			if ( key.startsWith("key=") ) {
-    				keyAux=key.substring(4) ;
-    			}
-    			result = htab.get(keyAux) ;
+    			result = htab.get(id) ;
     		} else {
     			result = TABLE_NOT_FOUND ;
     		}
@@ -41,6 +38,8 @@ public class SearchService {
 	}
 	
 	
+//    return Response.status(200).entity(result).build();
+    
     @GET
 	@Path("{table}/{key}")
     @Produces("application/json")
@@ -85,5 +84,6 @@ public class SearchService {
         return process(table, key) ;
     }
     
-        
+    
+    
 }

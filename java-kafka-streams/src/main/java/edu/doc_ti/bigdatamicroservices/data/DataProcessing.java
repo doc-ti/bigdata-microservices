@@ -17,6 +17,32 @@ public class DataProcessing {
 			"field_43",			"field_44",			"field_45",			"field_45",			"field_45",			"field_45",
 			"field_49",			"field_50",			"field_51",			"field_52",			"field_53",			"field_54"
 	};
+
+
+	@SuppressWarnings("unchecked")
+	public JSONObject processNoSearch(String input) {
+		
+		JSONObject json= new JSONObject();
+
+		String fields[] = input.split(",") ;
+		
+		if ( fields.length == fieldNames.length ) {
+			for ( int pos = 0 ; pos < fields.length ; pos++) {
+				json.put(fieldNames[pos], fields[pos]) ;
+			}
+		}
+		
+//		if ( fields.length >= LookupData.namesHT.length ) {
+//			for ( int pos = 0 ; pos < LookupData.namesHT.length ; pos++) {
+//				String name = LookupData.namesHT[pos] ;
+//				json.put(name, LookupData.htMain.get(name).get(fields[pos])) ;
+//			}
+//		}
+		
+		return json ;
+	}
+	
+	
 	
 	@SuppressWarnings("unchecked")
 	public String process(String input) {

@@ -17,10 +17,12 @@ import org.apache.http.util.EntityUtils;
 import org.apache.kafka.streams.processor.api.Processor;
 import org.apache.kafka.streams.processor.api.ProcessorContext;
 import org.apache.kafka.streams.processor.api.Record;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.doc_ti.bigdatamicroservices.data.DataProcessing;
+import edu.doc_ti.bigdatamicroservices.data.LookupData;
 
 public class ProcessorData implements Processor<String, String, String, String> {
 	private static final Logger LOG = LoggerFactory.getLogger(ProcessorData.class);
@@ -52,17 +54,14 @@ public class ProcessorData implements Processor<String, String, String, String> 
 
         String host = MainTopology.urlBase ;
         
-        if ( !MainTopology.isLocalProcessing ) {
-        	String aux[] = host.split("/") ;
-        	host = aux[2].replace(':', '-') ;
-        }
-        
+    	String aux[] = host.split("/") ;
+    	host = aux[2].replace(':', '-') ;
         
         try {
         	
-        	String serverType = makeHttpRequestGet(MainTopology.urlBase + "/identify", "") ;
+        	String serverType = makeHttpRequestGet(MainTopology.urlBase + "/identity", "", "") ;
         	
-        	File dir = new File ( context.applicationId() + ".threads_" + MainTopology.numThreads + "." + host + "." + serverType) ;
+        	File dir = new File ( context.applicationId() + ".threads_" + MainTopology.numThreads + "." + host + "." + serverType + "." + MainTopology.modeString) ;
         	dir.mkdir();
         	
 			fw = new FileWriter(new File(dir, context.applicationId() + "." + context.taskId() + ".th_" + MainTopology.numThreads + "." + host + ".txt"));
@@ -88,7 +87,8 @@ public class ProcessorData implements Processor<String, String, String, String> 
 //        kvStore = context.getStateStore("Counts");
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public void process(final Record<String, String> record) {
     	
     	counterRecords++ ;
@@ -100,11 +100,44 @@ public class ProcessorData implements Processor<String, String, String, String> 
     	long t0 = -System.nanoTime() ;
 
     	String result = "" ;
-    	if ( MainTopology.isLocalProcessing ) {
-    		result = dp.process( record.value() ) ;
-    	} else {
-    		result = makeHttpRequestPost(MainTopology.urlBase + "/process", "record=" + record.value() ) ;
+    	
+    	switch (MainTopology.mode) {
+			case MainTopology.MODE_LOCAL:
+	    		result = dp.process( record.value() ) ;
+			break ;
+			
+			case MainTopology.MODE_FULL :
+	    		result = makeHttpRequestPost(MainTopology.urlBase + "/process", "record" , record.value() ) ;
+			break ;
+			
+			case MainTopology.MODE_DUMMY :
+	    		result = dp.process( record.value() ) ;
+	    		for (int n=0 ; n<MainTopology.NUM_DUMMYS; n++)
+	    			makeHttpRequestGet(MainTopology.urlBase + "/dummy", "" , "" ) ;
+			break ;
+			
+			case MainTopology.MODE_SEARCH :
+				
+				JSONObject json = dp.processNoSearch(record.value()) ;
+				
+				for ( String table : LookupData.namesHT) {
+					String key = "" ;
+					Object aux= json.get("cod_" + table) ;
+					if ( aux != null ) {
+						key = aux.toString() ;
+					}
+		    		result = makeHttpRequestGet(MainTopology.urlBase + "/search/" + table, "key" , key ) ;
+		    		if ( result != null) {
+		    			json.put(table, result) ;
+		    		}
+				}
+				result = json.toString();
+			break ;
+    		
     	}
+    	
+    	
+    	
     	t0 += System.nanoTime() ;
     	try {
 			bw.write( ( "" + System.currentTimeMillis() + " " + t0 + "\n").toCharArray());
@@ -128,18 +161,18 @@ public class ProcessorData implements Processor<String, String, String, String> 
         p.httpClient = HttpClientBuilder.create().build();
 
 
-
     	for (int nn= 0 ; nn<1 ;nn++) {
 
 //        	String URL= "http://localhost:8080" ;
+//        	String URL= "http://localhost:8081" ;
 //        	String URL= "http://localhost:8080/api-rest" ;
         	String URL = "http://192.168.80.32:8080" ;
         	
-        	String auxS[] = {"/identify", "/process"} ;
+        	String auxS[] = {"/identity", "/dummy" , "/process"} ;
 	    	String x = "";
         	for (String aux : auxS) { 
             	long t0 = -System.nanoTime() ;
-	        	x = p.makeHttpRequestGet(URL + aux , record) ;
+	        	x = p.makeHttpRequestGet(URL + aux , "record", record) ;
 		    	t0 += System.nanoTime() ;
 		    	if ( x != null ) {
 			    	System.out.println(x) ;
@@ -147,7 +180,7 @@ public class ProcessorData implements Processor<String, String, String, String> 
 		    	System.out.println(t0/1000) ;
 
 	        	t0 = -System.nanoTime() ;
-		    	x = p.makeHttpRequestPost(URL + aux , record) ;
+		    	x = p.makeHttpRequestPost(URL + aux , "record", record) ;
 		    	t0 += System.nanoTime() ;
 		    	if ( x != null ) {
 			    	System.out.println(x) ;
@@ -158,8 +191,8 @@ public class ProcessorData implements Processor<String, String, String, String> 
 	}
     
     @SuppressWarnings("unused")
-	private String makeHttpRequestGet(String url, String record) {
-        HttpGet httpGet = new HttpGet(url+ "?record=" + record);
+	private String makeHttpRequestGet(String url, String param, String value) {
+        HttpGet httpGet = new HttpGet(url+ "?" + param + "=" + value);
 
         try {
             HttpResponse response = httpClient.execute(httpGet );
@@ -195,12 +228,12 @@ public class ProcessorData implements Processor<String, String, String, String> 
             return null ;        }
     }    
     
-    private String makeHttpRequestPost(String url, String record) {
+    private String makeHttpRequestPost(String url, String param, String value) {
     	
         HttpPost httpPost = new HttpPost(url);
         StringEntity entityIn = null;
 		try {
-			entityIn = new StringEntity("record="+record);
+			entityIn = new StringEntity(param + "=" + value);
 		} catch (UnsupportedEncodingException e1) {}    	
 
 		httpPost.setEntity(entityIn);
