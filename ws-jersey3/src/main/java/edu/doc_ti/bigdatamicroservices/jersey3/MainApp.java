@@ -16,6 +16,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import edu.doc_ti.bigdatamicroservices.jersey3.config.AutoScanFeature;
 import edu.doc_ti.bigdatamicroservices.jersey3.resource.LookupData;
+import edu.doc_ti.bigdatamicroservices.jersey3.service.BatchService;
 import edu.doc_ti.bigdatamicroservices.jersey3.service.DummyService;
 import edu.doc_ti.bigdatamicroservices.jersey3.service.IdentityService;
 import edu.doc_ti.bigdatamicroservices.jersey3.service.ProcessService;
@@ -80,6 +81,7 @@ public class MainApp {
         config.register(DummyService.class);
         config.register(IdentityService.class);
         config.register(SearchService.class);
+        config.register(BatchService.class);
 
         // enable auto scan @Contract and @Service
         config.register(AutoScanFeature.class);

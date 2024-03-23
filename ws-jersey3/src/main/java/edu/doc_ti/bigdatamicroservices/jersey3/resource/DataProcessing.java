@@ -1,5 +1,7 @@
 package edu.doc_ti.bigdatamicroservices.jersey3.resource;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 
@@ -19,6 +21,16 @@ public class DataProcessing {
 	};
 	
 	public String process(String input) {
+		JSONObject res = processAsJSON(input) ;
+		if ( res != null ) {
+			return res.toString();
+		} 
+		
+		return "" ; 
+ 	}
+	
+	
+	public JSONObject processAsJSON(String input) {
 		
 		String inputMod = input ;
 		if ( inputMod.startsWith("record=") ) {
@@ -45,8 +57,34 @@ public class DataProcessing {
 			}
 		}
 		
-		return json.toString() ;
+		return json ;
 	}
 	
-	
+	public String processBatch(String data) {
+		
+		try {
+	    	long t0 = -System.nanoTime() ;
+
+			
+			JSONObject json = new JSONObject(data);
+			JSONArray jarr = (JSONArray) json.get("records") ;
+			JSONArray jarrOut = new JSONArray() ;
+
+			for ( int index = 0 ; index < jarr.length(); index++) {
+//				System.out.println( index + "-[" + jarr.getString(index) + "]") ;
+				JSONObject res = processAsJSON(jarr.getString(index)) ; 
+				jarrOut.put( res ) ;
+			}
+			
+	    	t0 += System.nanoTime() ;
+			System.out.println( "Processed " + jarr.length() + " in " + (t0/1000) +" us." ) ;
+			
+			return jarrOut.toString() ;
+
+		} catch (JSONException e) {
+		}
+		
+		return "" ;
+	}
+		
 }

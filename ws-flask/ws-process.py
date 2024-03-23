@@ -21,21 +21,75 @@ fieldNames = [
 
 IDENT='flask' 
 
-@app.route('/identify', methods=['GET', 'POST'])
-def identify():
+@app.route('/dummy', methods=['GET', 'POST'])
+def dummy():
+    return "OK"
+
+
+@app.route('/identity', methods=['GET', 'POST'])
+def identity():
     return IDENT
+
+
+def searchData( table, key):
+    tab = mapsData[table];
+    return tab[key] ;
+
+
+@app.route('/search/<table>/<key>', methods=['GET', 'POST'])
+def searchV1(table, key):
+    
+    return searchData(table, key)
+
+@app.route('/params/<param1>', methods=['POST'])
+def handle_params(param1):
+    if request.method == 'POST':
+        # Leer el contenido de la solicitud POST
+        content = request.form
+        
+        # Realizar cualquier procesamiento necesario
+        result = {
+            'param1': param1,
+            'content': content
+        }
+        
+        return jsonify(result)
+
+
+
+@app.route('/search/<table>', methods=['GET', 'POST'])
+def searchV2(table):
+    if request.method == 'GET':
+        data = request.args.get('key')
+        key = request.args.get('key')
+    elif request.method == 'POST':
+        data = request.data.decode('utf-8')
+        key = request.data.decode('utf-8').replace('key=', '')
+
+
+    print("-----------(" + data + ")------" ) 
+    print("-----------(" + key + ").....") 
+
+    return searchData(table, key)
+
+
+@app.route('/search2/<table>', methods=['POST'])
+def searchV3(table):
+    data = request.data.decode('utf-8')
+    key = request.data.decode('utf-8').replace('key=', '')
+
+    print("-----------(" + data + ")------" )
+    print("-----------(" + key + ").....")
+
+    return searchData(table, key)
+
 
 
 @app.route('/process', methods=['GET'])
 def echo_get():
     data = request.args.get('record')
-#    print ( data)
-
     myfields = data.split(',')
-
     out = {  }
-#    out["len"] = len(myfields)
-#    out["len2"] = len(fieldNames)
 
     if ( len(myfields) >= len (fieldNames) ) :
         for index in range(0, len (fieldNames)) :
@@ -43,7 +97,6 @@ def echo_get():
 
         for index in range(0, 6) :
            htAux = mapsData[arrayMaps[index]]
-#           out[arrayMaps[index]] = myfields[index]
            out[arrayMaps[index]] = htAux[myfields[index]]
 
     # Return the received data
@@ -54,14 +107,8 @@ def echo_get():
 @app.route('/process', methods=['POST'])
 def echo_post():
     data = request.data.decode('utf-8').replace('record=', '')
-#    print (data) 
-
     myfields = data.split(',')
-
-
     out = {  }
-#    out["len"] = len(myfields)
-#    out["len2"] = len(fieldNames)
 
     if ( len(myfields) >= len (fieldNames) ) :
         for index in range(0, len (fieldNames)) :
@@ -69,12 +116,10 @@ def echo_post():
 
         for index in range(0, 6) :
            htAux = mapsData[arrayMaps[index]]
-#           out[arrayMaps[index]] = myfields[index]
            out[arrayMaps[index]] = htAux[myfields[index]]
 
     # Return the received data
     return jsonify(out)
-
 
 
 def load_file_into_hashmap(namemap):
@@ -93,6 +138,37 @@ def load_file_into_hashmap(namemap):
                 hashmap[parts[0]] = parts[1]
 
     return hashmap
+
+
+@app.route('/batch', methods=['POST'])
+def batch():
+    data = request.get_json()
+
+    if 'records' in data:
+        records = data['records']
+
+        # Procesar cada elemento del array
+        results = []
+        for record in records:
+#            print(record)
+            myfields = record.split(',')
+            out = {  }
+            if ( len(myfields) >= len (fieldNames) ) :
+                for index in range(0, len (fieldNames)) :
+                   out[fieldNames[index]] = myfields[index]
+
+                for index in range(0, 6) :
+                   htAux = mapsData[arrayMaps[index]]
+                   out[arrayMaps[index]] = htAux[myfields[index]]
+
+            if len(out) != 0 :
+              results.append(out)
+
+        return jsonify(results)
+    else:
+        return jsonify({'error': 'records not found'}), 400
+
+
 
 
 contador = 0 

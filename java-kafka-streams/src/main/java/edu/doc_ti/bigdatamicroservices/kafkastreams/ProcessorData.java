@@ -51,19 +51,15 @@ public class ProcessorData implements Processor<String, String, String, String> 
         this.httpClient = HttpClientBuilder.create().build();
         this.dp = new DataProcessing() ;
         
-
-        String host = MainTopology.urlBase ;
+       String host = MainTopology.urlBase ;
         
     	String aux[] = host.split("/") ;
     	host = aux[2].replace(':', '-') ;
         
         try {
-        	
         	String serverType = makeHttpRequestGet(MainTopology.urlBase + "/identity", "", "") ;
-        	
         	File dir = new File ( context.applicationId() + ".threads_" + MainTopology.numThreads + "." + host + "." + serverType + "." + MainTopology.modeString) ;
         	dir.mkdir();
-        	
 			fw = new FileWriter(new File(dir, context.applicationId() + "." + context.taskId() + ".th_" + MainTopology.numThreads + "." + host + ".txt"));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -135,9 +131,7 @@ public class ProcessorData implements Processor<String, String, String, String> 
 			break ;
     		
     	}
-    	
-    	
-    	
+
     	t0 += System.nanoTime() ;
     	try {
 			bw.write( ( "" + System.currentTimeMillis() + " " + t0 + "\n").toCharArray());
