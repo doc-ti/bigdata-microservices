@@ -1,4 +1,6 @@
 from flask import Flask, jsonify, request
+import sys
+from flask import __version__ as flask_version
 
 # Create a Flask application
 app = Flask(__name__)
@@ -19,7 +21,7 @@ fieldNames = [
 	"field_49",	"field_50",		"field_51",	"field_52",	"field_53",	"field_54"
 	]
 
-IDENT='flask' 
+IDENT='flask_' + flask_version.replace('.','_')
 
 @app.route('/dummy', methods=['GET', 'POST'])
 def dummy():
@@ -180,5 +182,13 @@ if __name__ == '__main__':
         mapaux = load_file_into_hashmap(element)
         mapsData[element] = mapaux
 
-    app.run(host='0.0.0.0', port=8080, debug=False)
+    if len(sys.argv) > 1:
+       myport=sys.argv[1]
+    else:
+       myport=8080
+
+
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=myport, threads=16, connection_limit=10000 )
+#    app.run(host='0.0.0.0', port=8080, debug=False)
 
