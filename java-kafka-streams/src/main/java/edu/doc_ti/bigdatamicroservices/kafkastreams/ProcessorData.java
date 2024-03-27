@@ -137,6 +137,7 @@ public class ProcessorData implements Processor<String, String, String, String> 
 			bw.write( ( "" + System.currentTimeMillis() + " " + t0 + "\n").toCharArray());
 			bw.flush();
 		} catch (IOException e) {
+			e.printStackTrace();
 		}
 //    	System.out.println(t0) ;
 

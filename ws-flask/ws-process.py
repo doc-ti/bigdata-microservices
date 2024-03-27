@@ -68,10 +68,6 @@ def searchV2(table):
         data = request.data.decode('utf-8')
         key = request.data.decode('utf-8').replace('key=', '')
 
-
-    print("-----------(" + data + ")------" ) 
-    print("-----------(" + key + ").....") 
-
     return searchData(table, key)
 
 
@@ -79,9 +75,6 @@ def searchV2(table):
 def searchV3(table):
     data = request.data.decode('utf-8')
     key = request.data.decode('utf-8').replace('key=', '')
-
-    print("-----------(" + data + ")------" )
-    print("-----------(" + key + ").....")
 
     return searchData(table, key)
 

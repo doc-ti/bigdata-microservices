@@ -217,7 +217,17 @@ public class MainTopology {
             		}
             	}
             	
-            	
+        		for ( ProcessorData p: arrProcesors ) {
+        			try {
+						p.bw.flush() ;
+						p.fw.flush();
+					} catch (IOException e) {}
+        			try {
+        				p.bw.close();
+        				p.fw.close();
+					} catch (IOException e) {}
+        		}
+           	
                 streams.close();
                 latch.countDown();
                 

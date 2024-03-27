@@ -112,7 +112,7 @@ public class KafkaGenerator {
         int totalCount = 0 ;
         int secondsCount = 0 ;
         while ( secondsCount < maxSeconds ) {
-            LOG.info("Generating "+ (speed) + " records") ;
+            LOG.info("Generating "+ (speed) + " records, (alredy generated " + (totalCount) + ")") ;
         	long t0 = System.currentTimeMillis();
         	for ( int nn = 1 ; nn<= speed; nn++ ) {
         		totalCount++ ;
