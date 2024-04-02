@@ -8,13 +8,13 @@ export TOPIC_BASE=test_bd_microservices
 export NUM_RECORDS=1000000
 export NUM_SEGUNDOS=$((NUM_RECORDS/10000))
 
-export URL=http://localhost
-export URL=http://edge01
+export RHOST=localhost
 
 export JAVA21=/usr/lib/jvm/jdk-21-oracle-x64/bin/java
+export URLS="htt://${RHOST}:8090 htt://${RHOST}:8091 htt://${RHOST}:8092"
 export PORTS="8090 8091 8092"
 export LIST_THREADS="1 2 4 8 16"
-export LIST_MODES="f l d6 s"
+export LIST_MODES="f l"
 
 OPTION=$1
 
@@ -82,7 +82,6 @@ if [ "$OPTION" == "start" ] ; then
 
   IFS=' ' read -r -a arrp <<< "$PORTS"
 
-
   echo Starting spring server on port ${arrp[0]}
   $JAVA21 -jar ws-spring-0.1.jar --server.port=${arrp[0]} > log.spring.log 2>&1 & echo $! > pid.spring
   sleep 3
@@ -111,10 +110,10 @@ if [ "$OPTION" == "start" ] ; then
 fi
 
 if [ "$OPTION" == "check" ] ; then
-  for PORT in $PORTS
+  for URL in $URLS
   do
-     echo Asking :  curl $URL:$PORT/identity 
-     curl $URL:$PORT/identity 2>/dev/null
+     echo Asking :  curl $URL/identity 
+     curl $URL/identity 2>/dev/null
      echo
   done
 fi
@@ -126,14 +125,16 @@ if [ "$OPTION" == "test" ] ; then
      curl $URL:$PORT/identity 2>/dev/null
      echo
 
-     for PORT in $PORTS
+     for URL in $URLS
      do
         for MODE in $LIST_MODES
         do
-            timeout 600 java -jar ../kafka-streams-microservices-0.1-jar-with-dependencies.jar -b $KAFKA_SERVER -t ${TOPIC_BASE}_in_$NN -o ${TOPIC_BASE}_out_$NN -u $URL:$PORT -n $NN -m $MODE
+            java -jar ../kafka-streams-microservices-0.1-jar-with-dependencies.jar -b $KAFKA_SERVER -t ${TOPIC_BASE}_in_$NN -o ${TOPIC_BASE}_out_$NN -u $URL -n $NN -m $MODE
         done
      done
   done
+
+  echo TEST FINISHED!!!!!
 fi
 
 if [ "$OPTION" == "stop" ] ; then

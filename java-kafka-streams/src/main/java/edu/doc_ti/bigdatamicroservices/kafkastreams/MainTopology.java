@@ -16,7 +16,10 @@
  */
 package edu.doc_ti.bigdatamicroservices.kafkastreams;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -168,7 +171,7 @@ public class MainTopology {
 		
 		
 		Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "microservice-test-" + sdf.format(new Date() ) );
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "ms-test-" + sdf.format(new Date()) + "-" + ((int)Math.random()*1000000) );
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
@@ -217,8 +220,25 @@ public class MainTopology {
             		}
             	}
             	
+            	long recs = 0 ;
+            	double recsD = 0 ;
+            	double sum = 0 ;
+            	double sum_2 = 0 ;
+            	long tMin = Long.MAX_VALUE ;
+            	long tMax = 0 ;
+            	String serverType = "" ;
         		for ( ProcessorData p: arrProcesors ) {
         			try {
+        				recs  += p.counterRecords ;
+        				recsD = recs ;
+        				System.out.println("RECS:" + recs) ;
+        				sum   += p.counterSum ;
+        				sum_2 += p.counterSum_2 ;
+        				serverType = p.serverType ;
+        				
+        				if ( p.counterTMin < tMin ) tMin = p.counterTMin;
+        				if ( p.counterTMax > tMax ) tMax = p.counterTMax;
+        				
 						p.bw.flush() ;
 						p.fw.flush();
 					} catch (IOException e) {}
@@ -228,6 +248,40 @@ public class MainTopology {
 					} catch (IOException e) {}
         		}
            	
+                String server = "unknown" ;
+                try {
+                    InetAddress dir = InetAddress.getLocalHost();
+                    server = dir.getHostName();
+                } catch (Exception e) {}
+
+    	        String remoteHost = MainTopology.urlBase ;
+    	    	String aux[] = remoteHost.split("/") ;
+    	    	remoteHost = aux[2].replace(':', '-') ;
+//				context.applicationId() + "." + context.taskId() + ".th_" + MainTopology.numThreads + "." + host + ".txt"));
+//
+                
+                System.out.println (
+                		String.format("OUTPUT,%s,%s,threads_%d,%d,%s,%s,%s,%d,%d,%f,%f\n", 
+                				 server,
+                				 sdf.format(new Date() ),
+                				 MainTopology.numThreads,
+                				 MainTopology.numThreads,
+                				 remoteHost,
+                				 serverType,
+                				 MainTopology.modeString,
+                				 recs,
+                				 (tMax-tMin),
+                				 sum/recs,
+                				 Math.sqrt((sum_2/recsD - (sum*sum)/recsD/recsD)) 
+                		)) ;
+                
+                System.out.println( sum + " / " + sum_2 ) ;
+                System.out.println( (sum_2/recs  ) );
+                System.out.println( (sum*sum)/recs/recs ) ;
+                System.out.println( (sum_2/recs - (sum*sum)/recs/recs) ) ;
+                System.out.println() ;
+                System.out.println() ;
+                System.out.println() ;
                 streams.close();
                 latch.countDown();
                 
@@ -270,7 +324,7 @@ public class MainTopology {
         System.exit(0);
     }
 
-	public static void register(ProcessorData processorData) {
+	public static synchronized void register(ProcessorData processorData) {
 		arrProcesors .add(processorData) ;
 	}
 	

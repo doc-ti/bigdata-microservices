@@ -6,7 +6,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Application;
 
-
 @Path("/identity")
 public class IdentityService {
 
@@ -14,6 +13,13 @@ public class IdentityService {
     static {
         Package jerseyPackage = Application.class.getPackage();
     	IDENT="jersey_" + jerseyPackage.getImplementationVersion().replace('.', '_') ;
+    	
+        try {
+            // Intenta cargar una clase específica de Tomcat
+            Class.forName("org.apache.catalina.startup.Bootstrap");
+            IDENT = "tomcat_jersey_" + jerseyPackage.getImplementationVersion().replace('.', '_') ;
+        } catch (ClassNotFoundException e) {}    	
+    	
     }	
 	
 	

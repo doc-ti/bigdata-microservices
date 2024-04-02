@@ -35,13 +35,18 @@ public class ProcessorData implements Processor<String, String, String, String> 
 //	private ObjectMapper mapper;
 //	private TypeReference<Map<String, String>> typeRef;
 
-    int counterRecords = 0 ;
+    long counterRecords = 0 ;
+    long counterSum = 0 ;
+    long counterSum_2 = 0 ;
+	String serverType = "" ;
+	long counterTMin = 0 ;
+	long counterTMax = 0 ;
     
 	private DataProcessing dp;
 
 	BufferedWriter bw;
 	FileWriter fw;
-
+	
 	@Override
     public void init(final ProcessorContext<String, String> context) {
     	
@@ -57,7 +62,7 @@ public class ProcessorData implements Processor<String, String, String, String> 
     	host = aux[2].replace(':', '-') ;
         
         try {
-        	String serverType = makeHttpRequestGet(MainTopology.urlBase + "/identity", "", "") ;
+        	serverType = makeHttpRequestGet(MainTopology.urlBase + "/identity", "", "") ;
         	File dir = new File ( context.applicationId() + ".threads_" + MainTopology.numThreads + "." + host + "." + serverType + "." + MainTopology.modeString) ;
         	dir.mkdir();
 			fw = new FileWriter(new File(dir, context.applicationId() + "." + context.taskId() + ".th_" + MainTopology.numThreads + "." + host + ".txt"));
@@ -71,7 +76,6 @@ public class ProcessorData implements Processor<String, String, String, String> 
   	  	
         LOG.info("Processor initialized.");
         
-    	
 //        context.schedule(Duration.ofSeconds(1), PunctuationType.STREAM_TIME, timestamp -> {
 //            try (final KeyValueIterator<String, Integer> iter = kvStore.all()) {
 //                while (iter.hasNext()) {
@@ -87,16 +91,10 @@ public class ProcessorData implements Processor<String, String, String, String> 
 	@Override
     public void process(final Record<String, String> record) {
     	
-    	counterRecords++ ;
-    	
-    	if ( counterRecords%1000 == 0 ) {
-    		LOG.info("Procesed " + counterRecords + " in task:" + _context.taskId() );
-    	}
-    	
-    	long t0 = -System.nanoTime() ;
-
+ 
     	String result = "" ;
     	
+       	long t0 = -System.nanoTime() ;
     	switch (MainTopology.mode) {
 			case MainTopology.MODE_LOCAL:
 	    		result = dp.process( record.value() ) ;
@@ -113,7 +111,6 @@ public class ProcessorData implements Processor<String, String, String, String> 
 			break ;
 			
 			case MainTopology.MODE_SEARCH :
-				
 				JSONObject json = dp.processNoSearch(record.value()) ;
 				
 				for ( String table : LookupData.namesHT) {
@@ -129,13 +126,28 @@ public class ProcessorData implements Processor<String, String, String, String> 
 				}
 				result = json.toString();
 			break ;
-    		
     	}
 
     	t0 += System.nanoTime() ;
+
+    	counterRecords++ ;
+    	if ( counterRecords%1000 == 0 ) {
+    		LOG.info("Procesed " + counterRecords + " in task:" + _context.taskId() );
+    		try {
+				bw.flush();
+			} catch (IOException e) {}
+    	}
+
+    	counterSum += t0 ;
+    	counterSum_2 += (t0*t0) ;
+    	if ( counterTMin == 0 ) {
+    		counterTMin = System.currentTimeMillis() ;
+    	}
+    	counterTMax = System.currentTimeMillis() ;
+    	
     	try {
 			bw.write( ( "" + System.currentTimeMillis() + " " + t0 + "\n").toCharArray());
-			bw.flush();
+//			bw.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
